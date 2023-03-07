@@ -3,6 +3,7 @@ from django.db import transaction
 from django.http.response import JsonResponse
 from django.views.generic import FormView
 from wagtail.contrib.modeladmin.views import IndexView
+from django.core.handlers.wsgi import WSGIRequest
 
 from .forms import SortingForm
 
@@ -21,7 +22,8 @@ class SortableIndexView(FormView, IndexView):
     def form_valid(self, form):
         super(SortableIndexView, self).form_valid(form)
 
-        if self.request.is_ajax():
+        # Fix for WSGIRequests
+        if isinstance(self.request, WSGIRequest) or self.request.is_ajax():
             order_ids = self.request.POST.getlist("items[]")
             app_label = self.model_admin.model._meta.app_label
             model_label = self.model_admin.model.__name__
