@@ -22,8 +22,7 @@ class SortableIndexView(FormView, IndexView):
     def form_valid(self, form):
         super(SortableIndexView, self).form_valid(form)
 
-        # Fix for WSGIRequests
-        if isinstance(self.request, WSGIRequest) or self.request.is_ajax():
+        try:
             order_ids = self.request.POST.getlist("items[]")
             app_label = self.model_admin.model._meta.app_label
             model_label = self.model_admin.model.__name__
@@ -41,7 +40,5 @@ class SortableIndexView(FormView, IndexView):
                     },
                     status=200,
                 )
-
-            return JsonResponse({"message": "Invalid Data"}, status=400)
-
-        return JsonResponse({"message": "Invalid request source"}, status=400)
+        except Exception as e:
+            return JsonResponse({"message": str(e)}, status=500)
